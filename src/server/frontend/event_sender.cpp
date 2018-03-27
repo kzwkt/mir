@@ -50,7 +50,7 @@ mfd::EventSender::EventSender(
 {
 }
 
-void mfd::EventSender::handle_event(MirEvent const& e)
+void mfd::EventSender::handle_event(EventUPtr&& event)
 {
     // In future we might send multiple events, or insert them into messages
     // containing other responses, but for now we send them individually.
