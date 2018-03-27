@@ -19,20 +19,44 @@
 #ifndef MIR_FRONTEND_BASIC_EVENT_SINK_H_
 #define MIR_FRONTEND_BASIC_EVENT_SINK_H_
 
-#include "null_event_sink.h"
+#include "mir/frontend/event_sink.h"
 
-#include <mir_toolkit/event.h>
-
-#include <wayland-server-core.h>
-
-#include <atomic>
-#include <functional>
+#include <memory>
 
 namespace mir
 {
+class Executor;
 namespace frontend
 {
+class WindowRole;
 
+class WindowEventSink : public EventSink
+{
+public:
+    WindowEventSink(WindowRole* target, std::shared_ptr<mir::Executor> executor, std::shared_ptr<bool> destroyed);
+
+    void handle_event(EventUPtr&& event) override;
+
+    void handle_lifecycle_event(MirLifecycleState) override {}
+    void handle_display_config_change(graphics::DisplayConfiguration const&) override {}
+    void send_ping(int32_t) override {}
+    void send_buffer(BufferStreamId, graphics::Buffer&, graphics::BufferIpcMsgType) override {}
+    void handle_input_config_change(MirInputConfig const&) override {}
+    void handle_error(ClientVisibleError const&) override {}
+    void add_buffer(graphics::Buffer&) override {}
+    void error_buffer(geometry::Size, MirPixelFormat, std::string const&) override {}
+    void update_buffer(graphics::Buffer&) override {}
+
+private:
+
+
+    std::shared_ptr<mir::Executor> const executor;
+    WindowRole* const target;
+    std::shared_ptr<bool> const destroyed;
+};
+
+
+/*
 class WlSeat;
 
 class BasicSurfaceEventSink : public NullEventSink
@@ -82,6 +106,7 @@ protected:
     std::atomic<bool> has_focus{false};
     std::atomic<MirWindowState> current_state{mir_window_state_unknown};
 };
+*/
 }
 }
 
