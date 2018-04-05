@@ -113,7 +113,7 @@ void mf::WlPointer::handle_event(MirPointerEvent const* event, WlSurface* surfac
         }
         case mir_pointer_action_leave:
         {
-            handle_leave(surface->raw_resource());
+            handle_leave(focused_surface);
             break;
         }
         case mir_pointer_action_motion:
@@ -127,7 +127,15 @@ void mf::WlPointer::handle_event(MirPointerEvent const* event, WlSurface* surfac
             auto point = Point{mir_pointer_event_axis_value(event, mir_pointer_axis_x),
                                         mir_pointer_event_axis_value(event, mir_pointer_axis_y)};
             auto transformed = surface->transform_point(point);
-            handle_motion(timestamp, transformed.first);
+            if (transformed.second == focused_surface)
+            {
+                handle_motion(timestamp, transformed.first);
+            }
+            else
+            {
+                handle_leave(focused_surface);
+                handle_enter(transformed.first, transformed.second);
+            }
 
             auto hscroll = mir_pointer_event_axis_value(event, mir_pointer_axis_hscroll) * 10;
             handle_axis(timestamp, WL_POINTER_AXIS_HORIZONTAL_SCROLL, hscroll);
@@ -152,6 +160,7 @@ void mf::WlPointer::handle_button(uint32_t time, uint32_t button, wl_pointer_but
 void mf::WlPointer::handle_enter(Point position, wl_resource* target)
 {
     cursor->apply_to(target);
+    focused_surface = target;
     auto const serial = wl_display_next_serial(display);
     wl_pointer_send_enter(
         resource,
@@ -194,6 +203,7 @@ void mf::WlPointer::handle_axis(uint32_t time, wl_pointer_axis axis, double dist
 
 void mf::WlPointer::handle_leave(wl_resource* target)
 {
+    focused_surface = nullptr;
     auto const serial = wl_display_next_serial(display);
     wl_pointer_send_leave(
         resource,
