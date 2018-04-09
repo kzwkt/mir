@@ -76,6 +76,11 @@ void mf::WlSubsurface::parent_has_committed()
     }
 }
 
+std::pair<geom::Point, wl_resource*> mf::WlSubsurface::transform_point(geom::Point point) const
+{
+    return surface->transform_point(point);
+}
+
 void mf::WlSubsurface::set_position(int32_t x, int32_t y)
 {
     surface->set_buffer_offset(geom::Displacement{x, y});

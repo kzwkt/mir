@@ -84,6 +84,10 @@ bool mf::WlSurface::synchronized() const
 
 std::pair<geom::Point, wl_resource*> mf::WlSurface::transform_point(geom::Point point) const
 {
+    if (children.size() > 0)
+    {
+        return children[0]->transform_point(point);
+    }
     return std::make_pair(point - buffer_offset_, resource);
 }
 
@@ -99,17 +103,21 @@ void mf::WlSurface::clear_role()
 
 std::unique_ptr<mf::WlSurface, std::function<void(mf::WlSurface*)>> mf::WlSurface::add_child(WlSubsurface* child)
 {
+    log_critical("There are %d children, adding one.", children.size());
     children.push_back(child);
+    log_critical("There are now %d children.", children.size());
 
     return std::unique_ptr<WlSurface, std::function<void(WlSurface*)>>(
         this,
         [child=child](WlSurface* self)
         {
+            log_critical("There are %d children, removing one.", self->children.size());
             // remove the child from the vector
             self->children.erase(std::remove(self->children.begin(),
                                              self->children.end(),
                                              child),
                                  self->children.end());
+            log_critical("There are now %d children.", self->children.size());
         });
 }
 

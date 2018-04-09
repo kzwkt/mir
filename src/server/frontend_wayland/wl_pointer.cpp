@@ -279,10 +279,10 @@ WlStreamCursor::WlStreamCursor(
 {
 }
 
-void WlStreamCursor::apply_to(wl_resource* target)
+void WlStreamCursor::apply_to(wl_resource* /*target*/)
 {
-    auto const mir_window = session->get_surface(mf::WlSurface::from(target)->surface_id);
-    mir_window->set_cursor_stream(stream, hotspot);
+    //auto const mir_window = session->get_surface(mf::WlSurface::from(target)->surface_id);
+    //mir_window->set_cursor_stream(stream, hotspot);
 }
 
 WlHiddenCursor::WlHiddenCursor(
