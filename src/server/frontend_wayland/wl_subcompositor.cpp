@@ -76,7 +76,7 @@ void mf::WlSubsurface::parent_has_committed()
     }
 }
 
-std::pair<geom::Point, wl_resource*> mf::WlSubsurface::transform_point(geom::Point point) const
+std::pair<geom::Point, mf::WlSurface*> mf::WlSubsurface::transform_point(geom::Point point)
 {
     return surface->transform_point(point);
 }

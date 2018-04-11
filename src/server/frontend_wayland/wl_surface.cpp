@@ -73,6 +73,18 @@ mf::WlSurface::WlSurface(
 mf::WlSurface::~WlSurface()
 {
     *destroyed = true;
+
+    log_critical("calling destroy listeners");
+    // so that remove_destroy_listener calls invoked from destroy listeners fail
+    auto listeners = move(destroy_listeners);
+    destroy_listeners.clear();
+    for (auto listener: listeners)
+    {
+        log_critical("calling destroy listener");
+        listener.second();
+    }
+    log_critical("called destroy listeners");
+
     role->destroy();
     session->destroy_buffer_stream(stream_id);
 }
@@ -82,13 +94,13 @@ bool mf::WlSurface::synchronized() const
     return role->synchronized();
 }
 
-std::pair<geom::Point, wl_resource*> mf::WlSurface::transform_point(geom::Point point) const
+std::pair<geom::Point, mf::WlSurface*> mf::WlSurface::transform_point(geom::Point point)
 {
     if (children.size() > 0)
     {
         return children[0]->transform_point(point);
     }
-    return std::make_pair(point - buffer_offset_, resource);
+    return std::make_pair(point - buffer_offset_, this);
 }
 
 void mf::WlSurface::set_role(WlSurfaceRole* role_)
@@ -135,6 +147,19 @@ void mf::WlSurface::populate_buffer_list(std::vector<shell::StreamSpecification>
     {
         subsurface->populate_buffer_list(buffers, offset);
     }
+}
+
+void mf::WlSurface::add_destroy_listener(void const* key, std::function<void()> listener)
+{
+    (void)key;
+    (void)listener;
+    //destroy_listeners[key] = listener;
+}
+
+void mf::WlSurface::remove_destroy_listener(void const* key)
+{
+    (void)key;
+    //destroy_listeners.erase(key);
 }
 
 mf::WlSurface* mf::WlSurface::from(wl_resource* resource)

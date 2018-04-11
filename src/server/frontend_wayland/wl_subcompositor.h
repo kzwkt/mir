@@ -63,7 +63,7 @@ public:
 
     void parent_has_committed();
 
-    std::pair<geometry::Point, wl_resource*> transform_point(geometry::Point point) const;
+    std::pair<geometry::Point, WlSurface*> transform_point(geometry::Point point);
 
 private:
     void set_position(int32_t x, int32_t y) override;

@@ -100,8 +100,8 @@ public:
     geometry::Displacement buffer_offset() const { return buffer_offset_; }
     geometry::Size buffer_size() const { return buffer_size_; }
     bool synchronized() const;
-    std::pair<geometry::Point, wl_resource*> transform_point(geometry::Point point) const;
-    wl_resource* raw_resource() { return resource; }
+    std::pair<geometry::Point, WlSurface*> transform_point(geometry::Point point);
+    wl_resource* raw_resource() const { return resource; }
 
     void set_role(WlSurfaceRole* role_);
     void clear_role();
@@ -111,6 +111,8 @@ public:
     void populate_buffer_list(std::vector<shell::StreamSpecification>& buffers,
                               geometry::Displacement const& parent_offset) const;
     void commit(WlSurfaceState const& state);
+    void add_destroy_listener(void const* key, std::function<void()> listener);
+    void remove_destroy_listener(void const* key);
 
     std::shared_ptr<mir::frontend::Session> const session;
     mir::frontend::BufferStreamId const stream_id;
@@ -131,6 +133,7 @@ private:
     geometry::Displacement buffer_offset_;
     geometry::Size buffer_size_;
     std::shared_ptr<std::vector<WlSurfaceState::Callback>> const pending_frames;
+    std::map<void const*, std::function<void()>> destroy_listeners;
     std::shared_ptr<bool> const destroyed;
 
     void destroy() override;
